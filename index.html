@@ -299,7 +299,9 @@ let currentPage = 'week';
 let currentTab = 'meals';
 let openRecipes = {};
 let chatLoading = false;
-let generating = false;
+let generating = false;        // full-page generating (new week)
+let loadingMeals = {};         // per-meal loading: { 'di-mi': true }
+let groceryRefreshing = false; // grocery list regenerating in background
 let saving = false;
 let saveQueued = false;
 
@@ -540,12 +542,21 @@ function renderMealsTab(week) {
       </div>`;
 
     day.meals.forEach((meal, mi) => {
-      const done = week.mealsDone && week.mealsDone[di+'-'+mi];
-      const recOpen = openRecipes[di+'-'+mi];
+      const mKey = di+'-'+mi;
+      const done = week.mealsDone && week.mealsDone[mKey];
+      const recOpen = openRecipes[mKey];
       const hasRecipe = meal.ingredients && meal.steps;
+      const isLoading = loadingMeals[mKey];
 
-      html += `<div class="meal-item">
-        <div class="meal-row ${done ? 'done' : ''}">
+      html += `<div class="meal-item" id="meal-${mKey}">`;
+
+      if (isLoading) {
+        html += `<div class="meal-row" style="justify-content:center;padding:20px;color:var(--text-muted);gap:10px">
+          <div class="spinner" style="width:18px;height:18px;border-width:2px"></div>
+          <span style="font-size:13px">Claude is thinking...</span>
+        </div>`;
+      } else {
+        html += `<div class="meal-row ${done ? 'done' : ''}">
           <div class="meal-check" onclick="toggleMealDone(${di},${mi})">${done ? '&#10003;' : ''}</div>
           <div class="meal-badge badge-${meal.type}">${meal.type}</div>
           <div class="meal-info">
@@ -559,17 +570,18 @@ function renderMealsTab(week) {
           ${hasRecipe ? `<div class="recipe-toggle ${recOpen?'open':''}" onclick="toggleRecipe(${di},${mi})">&#9660;</div>` : ''}
         </div>`;
 
-      if (hasRecipe) {
-        html += `<div class="recipe-panel ${recOpen?'open':''}"><div class="recipe-inner">
-          <div class="recipe-meta">
-            <span class="recipe-meta-tag">Serves ${meal.serves || 2}</span>
-            <span class="recipe-meta-tag">${meal.time || '?'}</span>
-          </div>
-          <div class="recipe-sec-title">Ingredients</div>
-          <ul class="recipe-ing">${(meal.ingredients||[]).map((ing, ii) => `<li><span class="editable-ing" contenteditable="true" onblur="updateIngredient(${di},${mi},${ii},this.textContent)">${ing}</span></li>`).join('')}</ul>
-          <div class="recipe-sec-title">Steps</div>
-          <ol class="recipe-steps">${(meal.steps||[]).map((step, si) => `<li><span class="editable-ing" contenteditable="true" onblur="updateStep(${di},${mi},${si},this.textContent)">${step}</span></li>`).join('')}</ol>
-        </div></div>`;
+        if (hasRecipe) {
+          html += `<div class="recipe-panel ${recOpen?'open':''}"><div class="recipe-inner">
+            <div class="recipe-meta">
+              <span class="recipe-meta-tag">Serves ${meal.serves || 2}</span>
+              <span class="recipe-meta-tag">${meal.time || '?'}</span>
+            </div>
+            <div class="recipe-sec-title">Ingredients</div>
+            <ul class="recipe-ing">${(meal.ingredients||[]).map((ing, ii) => `<li><span class="editable-ing" contenteditable="true" onblur="updateIngredient(${di},${mi},${ii},this.textContent)">${ing}</span></li>`).join('')}</ul>
+            <div class="recipe-sec-title">Steps</div>
+            <ol class="recipe-steps">${(meal.steps||[]).map((step, si) => `<li><span class="editable-ing" contenteditable="true" onblur="updateStep(${di},${mi},${si},this.textContent)">${step}</span></li>`).join('')}</ol>
+          </div></div>`;
+        }
       }
       html += '</div>';
     });
@@ -584,35 +596,50 @@ function renderMealsTab(week) {
 function renderGroceryTab(week) {
   const grocery = week.grocery || {};
   const sections = Object.keys(grocery);
-  if (sections.length === 0) {
+  if (sections.length === 0 && !groceryRefreshing) {
     return `<div class="empty-state"><p>No grocery list yet. Generate one from your meals or add items manually.</p>
       <button class="btn btn-primary" onclick="regenerateGroceryList()">Generate grocery list from meals</button></div>`;
   }
 
-  let totalG = 0, doneG = 0;
-  sections.forEach(s => { grocery[s].forEach((item, i) => { totalG++; if (week.groceryDone && week.groceryDone[s+'-'+i]) doneG++; }); });
-  const pct = totalG ? Math.round(doneG/totalG*100) : 0;
+  let html = '';
 
-  let html = `<div class="stats-row">
-    <div class="stat-card"><div class="stat-val">${doneG}/${totalG}</div><div class="stat-lbl">Purchased</div><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div></div>
-    <div class="stat-card"><div class="stat-val">${totalG - doneG}</div><div class="stat-lbl">Still need</div></div>
-  </div>`;
+  // Refreshing banner
+  if (groceryRefreshing) {
+    html += `<div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:#fff8e6;border:1px solid #f0e0a0;border-radius:8px;margin-bottom:16px;font-size:13px;color:#8a6d3b">
+      <div class="spinner" style="width:14px;height:14px;border-width:2px"></div>
+      Updating grocery list...
+    </div>`;
+  }
 
-  sections.forEach(section => {
-    let secDone = 0;
-    grocery[section].forEach((item, i) => { if (week.groceryDone && week.groceryDone[section+'-'+i]) secDone++; });
-    html += `<div class="grocery-section"><div class="grocery-sec-hdr">${section}<span class="grocery-sec-count">${secDone}/${grocery[section].length}</span></div>`;
-    grocery[section].forEach((item, idx) => {
-      const done = week.groceryDone && week.groceryDone[section+'-'+idx];
-      html += `<div class="grocery-item ${done?'checked':''}" onclick="toggleGroceryDone('${section}',${idx})"><div class="grocery-chk">${done?'&#10003;':''}</div><span>${item}</span></div>`;
+  if (sections.length > 0) {
+    let totalG = 0, doneG = 0;
+    sections.forEach(s => { grocery[s].forEach((item, i) => { totalG++; if (week.groceryDone && week.groceryDone[s+'-'+i]) doneG++; }); });
+    const pct = totalG ? Math.round(doneG/totalG*100) : 0;
+
+    html += `<div class="stats-row">
+      <div class="stat-card"><div class="stat-val">${doneG}/${totalG}</div><div class="stat-lbl">Purchased</div><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div></div>
+      <div class="stat-card"><div class="stat-val">${totalG - doneG}</div><div class="stat-lbl">Still need</div></div>
+    </div>`;
+
+    sections.forEach(section => {
+      let secDone = 0;
+      grocery[section].forEach((item, i) => { if (week.groceryDone && week.groceryDone[section+'-'+i]) secDone++; });
+      html += `<div class="grocery-section"><div class="grocery-sec-hdr">${section}<span class="grocery-sec-count">${secDone}/${grocery[section].length}</span></div>`;
+      grocery[section].forEach((item, idx) => {
+        const done = week.groceryDone && week.groceryDone[section+'-'+idx];
+        html += `<div class="grocery-item ${done?'checked':''}" onclick="toggleGroceryDone('${section}',${idx})"><div class="grocery-chk">${done?'&#10003;':''}</div><span>${item}</span></div>`;
+      });
+      html += '</div>';
     });
-    html += '</div>';
-  });
 
-  html += `<div style="display:flex;gap:8px;margin-top:12px">
-    <button class="btn" onclick="regenerateGroceryList()">Regenerate from meals</button>
-    <button class="btn btn-danger" onclick="resetGroceryChecks()">Reset checkmarks</button>
-  </div>`;
+    html += `<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+      <button class="btn" id="copyGroceryBtn" onclick="copyGroceryToClipboard()">Copy to clipboard</button>
+      <button class="btn" onclick="exportGroceryAsText()">Download as .txt</button>
+      <button class="btn" onclick="regenerateGroceryList()">Regenerate from meals</button>
+      <button class="btn btn-danger" onclick="resetGroceryChecks()">Reset checkmarks</button>
+    </div>`;
+  }
+
   return html;
 }
 
@@ -950,6 +977,7 @@ function removeMeal(di, mi) {
   });
   week.mealsDone = newDone;
   saveState();
+  onMealsChanged();
   renderWeekPage();
 }
 
@@ -960,6 +988,7 @@ function removeDay(di) {
   week.meals.splice(di, 1);
   week.mealsDone = {};
   saveState();
+  onMealsChanged();
   renderWeekPage();
 }
 
@@ -1013,6 +1042,7 @@ function addMealManual(di) {
   week.meals[di].meals.push(meal);
   saveState();
   closeModal();
+  onMealsChanged();
   renderWeekPage();
 }
 
@@ -1023,7 +1053,15 @@ async function addMealWithAI(di) {
   const dayName = week.meals[di].day;
   closeModal();
 
-  const existingMeals = week.meals[di].meals.map(m => m.name).join(', ');
+  // Add a placeholder meal and show loading on it
+  const placeholder = { type, name: 'Generating...', desc: '', serves: state.servings, time: '', ingredients: [], steps: [] };
+  week.meals[di].meals.push(placeholder);
+  const mi = week.meals[di].meals.length - 1;
+  const mKey = di + '-' + mi;
+  loadingMeals[mKey] = true;
+  renderWeekPage();
+
+  const existingMeals = week.meals[di].meals.filter((m,i) => i !== mi).map(m => m.name).join(', ');
   const prompt = `Suggest a single ${type} meal for ${dayName}. The other meals that day are: ${existingMeals || 'none yet'}.
 My dietary preferences: ${state.preferences || 'none specified'}.
 NEVER use these ingredients: ${state.exclusions || 'none'}.
@@ -1033,18 +1071,20 @@ Return ONLY valid JSON with this structure (no markdown, no explanation):
 {"type":"${type}","name":"...","desc":"...","serves":${state.servings},"time":"...","ingredients":["..."],"steps":["..."]}`;
 
   try {
-    generating = true;
-    renderWeekPage();
     const result = await callClaude(prompt);
     const meal = extractJSON(result);
     if (meal) {
-      week.meals[di].meals.push(meal);
-      saveState();
+      week.meals[di].meals[mi] = meal;
+    } else {
+      week.meals[di].meals.splice(mi, 1);
     }
+    saveState();
+    onMealsChanged();
   } catch(e) {
+    week.meals[di].meals.splice(mi, 1);
     alert('Failed: ' + e.message);
   }
-  generating = false;
+  delete loadingMeals[mKey];
   renderWeekPage();
 }
 
@@ -1053,6 +1093,10 @@ async function regenerateMeal(di, mi) {
   if (!week) return;
   const old = week.meals[di].meals[mi];
   const dayName = week.meals[di].day;
+  const mKey = di + '-' + mi;
+
+  loadingMeals[mKey] = true;
+  renderWeekPage();
 
   const prompt = `I want to replace this ${old.type} meal on ${dayName}: "${old.name}" (${old.desc}).
 Suggest a different ${old.type} meal that fits these preferences: ${state.preferences || 'none specified'}.
@@ -1063,18 +1107,17 @@ Return ONLY valid JSON (no markdown, no explanation):
 {"type":"${old.type}","name":"...","desc":"...","serves":${state.servings},"time":"...","ingredients":["..."],"steps":["..."]}`;
 
   try {
-    generating = true;
-    renderWeekPage();
     const result = await callClaude(prompt);
     const meal = extractJSON(result);
     if (meal) {
       week.meals[di].meals[mi] = meal;
       saveState();
+      onMealsChanged();
     }
   } catch(e) {
     alert('Failed: ' + e.message);
   }
-  generating = false;
+  delete loadingMeals[mKey];
   renderWeekPage();
 }
 
@@ -1129,6 +1172,45 @@ function resetGroceryChecks() {
   renderWeekPage();
 }
 
+// Called whenever meals are added, removed, or regenerated
+let groceryDebounceTimer = null;
+function onMealsChanged() {
+  // Debounce: wait 2 seconds after last meal change before refreshing grocery list
+  clearTimeout(groceryDebounceTimer);
+  groceryDebounceTimer = setTimeout(() => refreshGroceryList(), 2000);
+}
+
+async function refreshGroceryList() {
+  const week = activeWeek();
+  if (!week || !week.meals.length) return;
+
+  // Only auto-refresh if there are meals with ingredients
+  const allMeals = [];
+  week.meals.forEach(d => d.meals.forEach(m => {
+    if (m.ingredients && m.ingredients.length > 0) {
+      allMeals.push({ name: m.name, ingredients: m.ingredients });
+    }
+  }));
+  if (allMeals.length === 0) return;
+
+  groceryRefreshing = true;
+  if (currentTab === 'grocery') renderWeekPage();
+
+  try {
+    const result = await callClaude(buildGroceryPrompt(allMeals));
+    const parsed = extractJSON(result);
+    if (parsed && parsed.grocery) {
+      week.grocery = parsed.grocery;
+      week.groceryDone = {};
+      saveState();
+    }
+  } catch(e) {
+    console.error('Grocery refresh failed:', e.message);
+  }
+  groceryRefreshing = false;
+  if (currentTab === 'grocery') renderWeekPage();
+}
+
 async function regenerateGroceryList() {
   const week = activeWeek();
   if (!week || !week.meals.length) return;
@@ -1138,20 +1220,11 @@ async function regenerateGroceryList() {
     allMeals.push({ name: m.name, ingredients: m.ingredients || [] });
   }));
 
-  const prompt = `Given these meals and their ingredients, create a consolidated grocery list grouped by logical store sections.
-
-Meals:
-${allMeals.map(m => `- ${m.name}: ${m.ingredients.join(', ')}`).join('\n')}
-
-Combine duplicate ingredients and adjust quantities for the full week. Include quantities in parentheses.
-Choose whatever grocery categories make sense (e.g., Produce, Protein, Pantry Staples, Oils/Spices/Seasonings, etc.).
-Return ONLY valid JSON (no markdown):
-{"grocery":{"Category":["item (qty)"]}}`;
+  groceryRefreshing = true;
+  renderWeekPage();
 
   try {
-    generating = true;
-    renderWeekPage();
-    const result = await callClaude(prompt);
+    const result = await callClaude(buildGroceryPrompt(allMeals));
     const parsed = extractJSON(result);
     if (parsed && parsed.grocery) {
       week.grocery = parsed.grocery;
@@ -1161,9 +1234,57 @@ Return ONLY valid JSON (no markdown):
   } catch(e) {
     alert('Failed: ' + e.message);
   }
-  generating = false;
+  groceryRefreshing = false;
   currentTab = 'grocery';
   renderWeekPage();
+}
+
+function buildGroceryPrompt(allMeals) {
+  return `Given these meals and their ingredients, create a consolidated grocery list grouped by logical store sections.
+
+Meals:
+${allMeals.map(m => `- ${m.name}: ${m.ingredients.join(', ')}`).join('\n')}
+
+Combine duplicate ingredients and adjust quantities for the full week. Include quantities in parentheses.
+Choose whatever grocery categories make sense (e.g., Produce, Protein, Pantry Staples, Oils/Spices/Seasonings, etc.).
+Return ONLY valid JSON (no markdown):
+{"grocery":{"Category":["item (qty)"]}}`;
+}
+
+function copyGroceryToClipboard() {
+  const week = activeWeek();
+  if (!week || !week.grocery) return;
+  const lines = [];
+  Object.entries(week.grocery).forEach(([section, items]) => {
+    lines.push(section.toUpperCase());
+    items.forEach(item => {
+      const done = week.groceryDone && week.groceryDone[section + '-' + items.indexOf(item)];
+      lines.push((done ? '  [x] ' : '  [ ] ') + item);
+    });
+    lines.push('');
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const btn = document.getElementById('copyGroceryBtn');
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy to clipboard'; }, 2000); }
+  });
+}
+
+function exportGroceryAsText() {
+  const week = activeWeek();
+  if (!week || !week.grocery) return;
+  const lines = ['GROCERY LIST - ' + week.label, ''];
+  Object.entries(week.grocery).forEach(([section, items]) => {
+    lines.push(section.toUpperCase());
+    items.forEach(item => lines.push('  - ' + item));
+    lines.push('');
+  });
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'grocery-list.txt';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ============================================================
