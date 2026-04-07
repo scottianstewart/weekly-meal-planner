@@ -225,6 +225,29 @@
     .sidebar { display: none; }
     .chat-panel { position: fixed; right: 0; top: 0; bottom: 0; z-index: 50; width: 100%; }
     .chat-panel.collapsed { width: 0; }
+    .main-header { padding: 16px 16px 12px; }
+    .main-header h1 { font-size: 18px; }
+    .main-header-sub { font-size: 12px; }
+    .main-body { padding: 16px; }
+    .stats-row { gap: 8px; margin-bottom: 16px; }
+    .stat-card { padding: 10px 14px; }
+    .stat-val { font-size: 20px; }
+    .stat-lbl { font-size: 10px; }
+    .day-card { margin-bottom: 12px; }
+    .day-hdr { padding: 10px 14px; font-size: 15px; }
+    .meal-row { padding: 10px 14px; gap: 10px; }
+    .meal-name { font-size: 13px; }
+    .meal-desc { font-size: 11px; }
+    .meal-badge { font-size: 9px; padding: 2px 6px; }
+    .add-meal-row { padding: 6px 14px; }
+    .recipe-inner { padding: 12px 14px; }
+    .tabs-bar { margin-bottom: 16px; }
+    .grocery-item { padding: 8px 14px; }
+    .grocery-sec-hdr { padding: 10px 14px; }
+    .empty-state { padding: 40px 16px; }
+    .modal { padding: 20px; }
+    .settings-group { padding: 16px; }
+    .meal-actions { opacity: 1; }
   }
 </style>
 </head>
@@ -470,7 +493,7 @@ function renderWeekPage() {
   const body = document.getElementById('mainBody');
 
   if (!week) {
-    hdr.innerHTML = `<div><h1>Meal Planner</h1><div class="main-header-sub">No week selected</div></div><div class="header-actions"><button class="btn" onclick="toggleChat()">Chat with Claude</button></div>`;
+    hdr.innerHTML = `<div><h1>Meal Planner</h1><div class="main-header-sub">No week selected</div></div>`;
     body.innerHTML = `<div class="empty-state"><h3>No weeks yet</h3><p>Click "+ Add Week" in the sidebar to get started. You can create a blank week or have Claude generate one for you.</p></div>`;
     return;
   }
@@ -480,10 +503,7 @@ function renderWeekPage() {
       <h1>${week.label}</h1>
       <div class="main-header-sub">${week.description || 'No description'} ${week.archived ? '<span style="color:#d44">(Archived)</span>' : ''}</div>
     </div>
-    <div class="header-actions">
-      <button class="btn btn-sm" onclick="toggleChat()">Chat with Claude</button>
-      <button class="btn btn-primary btn-sm" onclick="generateWeekWithAI()">Generate with AI</button>
-    </div>`;
+`;
 
   if (generating) {
     body.innerHTML = `<div class="generating"><div class="spinner"></div><div>Claude is creating your meal plan...</div></div>`;
