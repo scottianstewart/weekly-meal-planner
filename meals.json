@@ -3,54 +3,74 @@
   "description": "Low-inflammatory, dairy-free | 2 servings (lunch Friday only)",
   "meals": [
     {
-      "day": "Tuesday",
-      "meals": [
-        {
-          "type": "breakfast", "name": "Green Smoothie",
-          "desc": "Spinach, banana, frozen mango, flaxseed, and coconut milk",
-          "serves": 2, "time": "5 min",
-          "ingredients": ["2 large handfuls fresh spinach", "2 bananas", "1 cup frozen mango chunks", "2 tbsp ground flaxseed", "2 cups coconut milk", "1 tbsp raw honey (optional)"],
-          "steps": ["Add coconut milk and spinach to a blender and blend until smooth.", "Add banana, frozen mango, and flaxseed.", "Blend on high for 45-60 seconds until completely smooth.", "Pour into two glasses and serve immediately."]
-        },
-        {
-          "type": "dinner", "name": "Baked Cod",
-          "desc": "Roasted sweet potatoes and sauteed kale with garlic and lemon",
-          "serves": 2, "time": "40 min",
-          "ingredients": ["2 cod fillets (8 oz each)", "2 medium sweet potatoes, cubed", "1 bunch kale, stems removed and chopped", "3 cloves garlic, minced", "2 tbsp extra virgin olive oil", "1 lemon, juiced and zested", "Salt and pepper to taste"],
-          "steps": ["Preheat oven to 400F. Toss sweet potato cubes with 1 tbsp olive oil, salt, and pepper. Spread on a baking sheet.", "Roast sweet potatoes for 15 minutes, then flip.", "Season cod with salt, pepper, and half the lemon juice. Place on the baking sheet alongside the potatoes.", "Bake for another 12-15 minutes until cod flakes easily with a fork.", "While fish bakes, heat remaining olive oil in a pan over medium heat. Saute garlic for 30 seconds, then add kale.", "Cook kale 3-4 minutes until wilted. Finish with remaining lemon juice and zest.", "Plate the cod over sweet potatoes with kale on the side."]
-        },
-        {
-          "type": "snack", "name": "Mixed Nuts & Dried Apricots",
-          "desc": "Walnuts, almonds, cashews, and dried apricots",
-          "serves": 2, "time": "2 min",
-          "ingredients": ["1/4 cup walnuts", "1/4 cup almonds", "1/4 cup cashews", "6-8 dried apricots"],
-          "steps": ["Combine nuts and apricots in a bowl or divide into two portions.", "Store extras in an airtight container for later in the week."]
-        }
-      ]
-    },
-    {
       "day": "Wednesday",
       "meals": [
         {
-          "type": "breakfast", "name": "Sweet Potato & Black Bean Hash",
+          "type": "breakfast",
+          "name": "Sweet Potato & Black Bean Hash",
           "desc": "Sauteed onions, bell peppers, topped with sliced avocado",
-          "serves": 2, "time": "25 min",
-          "ingredients": ["2 medium sweet potatoes, peeled and diced small", "1 can (15 oz) black beans, drained and rinsed", "1 yellow onion, diced", "2 bell peppers, diced", "1 avocado, sliced", "2 tbsp coconut oil", "1 tsp ground cumin", "1/2 tsp smoked paprika", "Salt and pepper to taste"],
-          "steps": ["Heat coconut oil in a large skillet over medium-high heat.", "Add diced sweet potatoes and cook for 10-12 minutes, stirring occasionally, until tender and lightly browned.", "Add onion and bell peppers. Cook 4-5 minutes until softened.", "Stir in black beans, cumin, smoked paprika, salt, and pepper. Cook 2-3 minutes until heated through.", "Divide between two plates and top each with sliced avocado."]
+          "serves": 2,
+          "time": "25 min",
+          "ingredients": [
+            "2 medium sweet potatoes, peeled and diced small",
+            "1 can (15 oz) black beans, drained and rinsed",
+            "1 yellow onion, diced",
+            "2 bell peppers, diced",
+            "1 avocado, sliced",
+            "2 tbsp coconut oil",
+            "1 tsp ground cumin",
+            "1/2 tsp smoked paprika",
+            "Salt and pepper to taste"
+          ],
+          "steps": [
+            "Heat coconut oil in a large skillet over medium-high heat.",
+            "Add diced sweet potatoes and cook for 10-12 minutes, stirring occasionally, until tender and lightly browned.",
+            "Add onion and bell peppers. Cook 4-5 minutes until softened.",
+            "Stir in black beans, cumin, smoked paprika, salt, and pepper. Cook 2-3 minutes until heated through.",
+            "Divide between two plates and top each with sliced avocado."
+          ]
         },
         {
-          "type": "dinner", "name": "Herb-Crusted Chicken Thighs",
+          "type": "dinner",
+          "name": "Herb-Crusted Chicken Thighs",
           "desc": "Roasted broccoli and quinoa",
-          "serves": 2, "time": "45 min",
-          "ingredients": ["4 bone-in chicken thighs (about 1.5 lbs)", "1 large head broccoli, cut into florets", "1 cup quinoa, rinsed", "2 cups water or broth", "2 tbsp extra virgin olive oil", "3 cloves garlic, minced", "1 tsp dried thyme", "1 tsp dried rosemary", "Salt and pepper to taste"],
-          "steps": ["Preheat oven to 425F. Rinse quinoa and combine with water in a saucepan. Bring to a boil, reduce to low, cover, and cook 15 minutes.", "Mix olive oil, garlic, thyme, rosemary, salt, and pepper. Rub over chicken thighs.", "Place chicken skin-side up on a baking sheet. Roast for 20 minutes.", "Toss broccoli florets with a drizzle of olive oil, salt, and pepper. Add to the baking sheet around the chicken.", "Roast another 15-20 minutes until chicken reaches 165F and broccoli is crispy at the edges.", "Fluff quinoa with a fork and serve alongside the chicken and broccoli."]
+          "serves": 2,
+          "time": "45 min",
+          "ingredients": [
+            "4 bone-in chicken thighs (about 1.5 lbs)",
+            "1 large head broccoli, cut into florets",
+            "1 cup quinoa, rinsed",
+            "2 cups water or broth",
+            "2 tbsp extra virgin olive oil",
+            "3 cloves garlic, minced",
+            "1 tsp dried thyme",
+            "1 tsp dried rosemary",
+            "Salt and pepper to taste"
+          ],
+          "steps": [
+            "Preheat oven to 425F. Rinse quinoa and combine with water in a saucepan. Bring to a boil, reduce to low, cover, and cook 15 minutes.",
+            "Mix olive oil, garlic, thyme, rosemary, salt, and pepper. Rub over chicken thighs.",
+            "Place chicken skin-side up on a baking sheet. Roast for 20 minutes.",
+            "Toss broccoli florets with a drizzle of olive oil, salt, and pepper. Add to the baking sheet around the chicken.",
+            "Roast another 15-20 minutes until chicken reaches 165F and broccoli is crispy at the edges.",
+            "Fluff quinoa with a fork and serve alongside the chicken and broccoli."
+          ]
         },
         {
-          "type": "snack", "name": "Celery & Almond Butter",
+          "type": "snack",
+          "name": "Celery & Almond Butter",
           "desc": "With a sprinkle of hemp seeds",
-          "serves": 2, "time": "3 min",
-          "ingredients": ["4-6 celery stalks, cut into sticks", "3 tbsp almond butter", "1 tbsp hemp seeds"],
-          "steps": ["Spread almond butter into the celery grooves or serve on the side for dipping.", "Sprinkle hemp seeds over the top."]
+          "serves": 2,
+          "time": "3 min",
+          "ingredients": [
+            "4-6 celery stalks, cut into sticks",
+            "3 tbsp almond butter",
+            "1 tbsp hemp seeds"
+          ],
+          "steps": [
+            "Spread almond butter into the celery grooves or serve on the side for dipping.",
+            "Sprinkle hemp seeds over the top."
+          ]
         }
       ]
     },
@@ -58,25 +78,70 @@
       "day": "Thursday",
       "meals": [
         {
-          "type": "breakfast", "name": "Chia Pudding",
+          "type": "breakfast",
+          "name": "Chia Pudding",
           "desc": "Coconut milk, sliced strawberries, and unsweetened coconut flakes",
-          "serves": 2, "time": "5 min + overnight",
-          "ingredients": ["1/3 cup chia seeds", "1.5 cups full-fat coconut milk", "1 tbsp raw honey", "1/2 tsp vanilla extract", "1 cup strawberries, sliced", "2 tbsp unsweetened coconut flakes"],
-          "steps": ["Whisk chia seeds, coconut milk, honey, and vanilla in a bowl or jar.", "Stir well, making sure there are no clumps.", "Cover and refrigerate overnight (or at least 4 hours) until thick and pudding-like.", "In the morning, stir and divide into two bowls. Top with sliced strawberries and coconut flakes."]
+          "serves": 2,
+          "time": "5 min + overnight",
+          "ingredients": [
+            "1/3 cup chia seeds",
+            "1.5 cups full-fat coconut milk",
+            "1 tbsp raw honey",
+            "1/2 tsp vanilla extract",
+            "1 cup strawberries, sliced",
+            "2 tbsp unsweetened coconut flakes"
+          ],
+          "steps": [
+            "Whisk chia seeds, coconut milk, honey, and vanilla in a bowl or jar.",
+            "Stir well, making sure there are no clumps.",
+            "Cover and refrigerate overnight (or at least 4 hours) until thick and pudding-like.",
+            "In the morning, stir and divide into two bowls. Top with sliced strawberries and coconut flakes."
+          ]
         },
         {
-          "type": "dinner", "name": "Shrimp Tacos",
+          "type": "dinner",
+          "name": "Shrimp Tacos",
           "desc": "Corn tortillas, cabbage slaw, avocado, and lime crema (cashew cream)",
-          "serves": 2, "time": "25 min",
-          "ingredients": ["1 lb wild-caught shrimp, peeled and deveined", "8 small corn tortillas", "2 cups shredded cabbage (green or purple)", "1 avocado, sliced", "1/4 cup cashew cream", "3 limes (1 juiced for crema, 2 for serving)", "1 tbsp coconut oil", "1 tsp chili powder", "1/2 tsp ground cumin", "1/2 tsp garlic powder", "Salt and pepper to taste", "Fresh cilantro for garnish"],
-          "steps": ["Toss shrimp with chili powder, cumin, garlic powder, salt, and pepper.", "Heat coconut oil in a skillet over medium-high heat. Cook shrimp 2-3 minutes per side until pink and opaque. Set aside.", "Make the lime crema by mixing cashew cream with the juice of 1 lime and a pinch of salt.", "Warm corn tortillas in a dry skillet or directly over a gas flame for 15-20 seconds per side.", "Build tacos: layer shredded cabbage, shrimp, avocado slices, and a drizzle of lime crema.", "Garnish with cilantro and serve with lime wedges."]
+          "serves": 2,
+          "time": "25 min",
+          "ingredients": [
+            "1 lb wild-caught shrimp, peeled and deveined",
+            "8 small corn tortillas",
+            "2 cups shredded cabbage (green or purple)",
+            "1 avocado, sliced",
+            "1/4 cup cashew cream",
+            "3 limes (1 juiced for crema, 2 for serving)",
+            "1 tbsp coconut oil",
+            "1 tsp chili powder",
+            "1/2 tsp ground cumin",
+            "1/2 tsp garlic powder",
+            "Salt and pepper to taste",
+            "Fresh cilantro for garnish"
+          ],
+          "steps": [
+            "Toss shrimp with chili powder, cumin, garlic powder, salt, and pepper.",
+            "Heat coconut oil in a skillet over medium-high heat. Cook shrimp 2-3 minutes per side until pink and opaque. Set aside.",
+            "Make the lime crema by mixing cashew cream with the juice of 1 lime and a pinch of salt.",
+            "Warm corn tortillas in a dry skillet or directly over a gas flame for 15-20 seconds per side.",
+            "Build tacos: layer shredded cabbage, shrimp, avocado slices, and a drizzle of lime crema.",
+            "Garnish with cilantro and serve with lime wedges."
+          ]
         },
         {
-          "type": "snack", "name": "Fresh Berries & Pumpkin Seeds",
+          "type": "snack",
+          "name": "Fresh Berries & Pumpkin Seeds",
           "desc": "Blueberries and raspberries with pumpkin seeds",
-          "serves": 2, "time": "2 min",
-          "ingredients": ["1 cup blueberries", "1/2 cup raspberries", "3 tbsp pumpkin seeds"],
-          "steps": ["Rinse berries and divide between two bowls.", "Top each with pumpkin seeds."]
+          "serves": 2,
+          "time": "2 min",
+          "ingredients": [
+            "1 cup blueberries",
+            "1/2 cup raspberries",
+            "3 tbsp pumpkin seeds"
+          ],
+          "steps": [
+            "Rinse berries and divide between two bowls.",
+            "Top each with pumpkin seeds."
+          ]
         }
       ]
     },
@@ -84,32 +149,90 @@
       "day": "Friday",
       "meals": [
         {
-          "type": "breakfast", "name": "Banana Oat Pancakes",
+          "type": "breakfast",
+          "name": "Banana Oat Pancakes",
           "desc": "Mashed banana, oats, egg, cinnamon, cooked in coconut oil with fresh berries",
-          "serves": 2, "time": "20 min",
-          "ingredients": ["2 ripe bananas, mashed", "1 cup rolled oats", "2 eggs", "1 tsp cinnamon", "1 tbsp coconut oil", "Fresh berries for topping", "Raw honey for drizzling (optional)"],
-          "steps": ["Blend or mash bananas, oats, eggs, and cinnamon into a batter. Let it sit for 5 minutes so the oats soften.", "Heat coconut oil in a non-stick skillet over medium heat.", "Pour about 3 tablespoons of batter per pancake. Cook 2-3 minutes until bubbles form on the surface.", "Flip and cook another 1-2 minutes until golden.", "Repeat with remaining batter (makes about 6-8 small pancakes).", "Serve topped with fresh berries and a drizzle of honey if desired."]
+          "serves": 2,
+          "time": "20 min",
+          "ingredients": [
+            "2 ripe bananas, mashed",
+            "1 cup rolled oats",
+            "2 eggs",
+            "1 tsp cinnamon",
+            "1 tbsp coconut oil",
+            "Fresh berries for topping",
+            "Raw honey for drizzling (optional)"
+          ],
+          "steps": [
+            "Blend or mash bananas, oats, eggs, and cinnamon into a batter. Let it sit for 5 minutes so the oats soften.",
+            "Heat coconut oil in a non-stick skillet over medium heat.",
+            "Pour about 3 tablespoons of batter per pancake. Cook 2-3 minutes until bubbles form on the surface.",
+            "Flip and cook another 1-2 minutes until golden.",
+            "Repeat with remaining batter (makes about 6-8 small pancakes).",
+            "Serve topped with fresh berries and a drizzle of honey if desired."
+          ]
         },
         {
-          "type": "lunch", "name": "Mediterranean Chickpea Salad",
+          "type": "lunch",
+          "name": "Mediterranean Chickpea Salad",
           "desc": "Cucumber, tomatoes, red onion, olives, parsley, and lemon-olive oil dressing",
-          "serves": 1, "time": "10 min",
-          "ingredients": ["1 can (15 oz) chickpeas, drained and rinsed", "1 cucumber, diced", "1 cup cherry tomatoes, halved", "1/4 red onion, thinly sliced", "1/4 cup Kalamata olives, halved", "2 tbsp fresh parsley, chopped", "2 tbsp extra virgin olive oil", "1 lemon, juiced", "Salt and pepper to taste"],
-          "steps": ["Combine chickpeas, cucumber, tomatoes, red onion, olives, and parsley in a bowl.", "Whisk olive oil, lemon juice, salt, and pepper together.", "Pour dressing over the salad and toss to combine.", "Serve immediately or refrigerate for 30 minutes to let flavors meld."]
+          "serves": 1,
+          "time": "10 min",
+          "ingredients": [
+            "1 can (15 oz) chickpeas, drained and rinsed",
+            "1 cucumber, diced",
+            "1 cup cherry tomatoes, halved",
+            "1/4 red onion, thinly sliced",
+            "1/4 cup Kalamata olives, halved",
+            "2 tbsp fresh parsley, chopped",
+            "2 tbsp extra virgin olive oil",
+            "1 lemon, juiced",
+            "Salt and pepper to taste"
+          ],
+          "steps": [
+            "Combine chickpeas, cucumber, tomatoes, red onion, olives, and parsley in a bowl.",
+            "Whisk olive oil, lemon juice, salt, and pepper together.",
+            "Pour dressing over the salad and toss to combine.",
+            "Serve immediately or refrigerate for 30 minutes to let flavors meld."
+          ]
         },
         {
-          "type": "dinner", "name": "Baked Salmon",
+          "type": "dinner",
+          "name": "Baked Salmon",
           "desc": "Ginger-tamari glaze, steamed broccoli, and jasmine rice",
-          "serves": 2, "time": "30 min",
-          "ingredients": ["2 salmon fillets (8 oz each)", "2 tbsp tamari or coconut aminos", "1 tbsp fresh ginger, grated", "1 clove garlic, minced", "1 tsp sesame oil", "1 tbsp raw honey", "1 large head broccoli, cut into florets", "1 cup jasmine rice", "2 cups water"],
-          "steps": ["Start the rice: rinse jasmine rice, combine with water in a pot, bring to a boil, reduce to low, cover, and cook 15 minutes.", "Preheat oven to 400F. Mix tamari, grated ginger, garlic, sesame oil, and honey to make the glaze.", "Place salmon on a lined baking sheet. Spoon glaze over each fillet.", "Bake for 12-15 minutes until salmon flakes easily.", "While salmon bakes, steam broccoli florets for 4-5 minutes until bright green and tender-crisp.", "Fluff rice and serve salmon over rice with broccoli on the side. Spoon any remaining glaze from the pan over the fish."]
+          "serves": 2,
+          "time": "30 min",
+          "ingredients": [
+            "2 salmon fillets (8 oz each)",
+            "2 tbsp tamari or coconut aminos",
+            "1 tbsp fresh ginger, grated",
+            "1 clove garlic, minced",
+            "1 tsp sesame oil",
+            "1 tbsp raw honey",
+            "1 large head broccoli, cut into florets",
+            "1 cup jasmine rice",
+            "2 cups water"
+          ],
+          "steps": [
+            "Start the rice: rinse jasmine rice, combine with water in a pot, bring to a boil, reduce to low, cover, and cook 15 minutes.",
+            "Preheat oven to 400F. Mix tamari, grated ginger, garlic, sesame oil, and honey to make the glaze.",
+            "Place salmon on a lined baking sheet. Spoon glaze over each fillet.",
+            "Bake for 12-15 minutes until salmon flakes easily.",
+            "While salmon bakes, steam broccoli florets for 4-5 minutes until bright green and tender-crisp.",
+            "Fluff rice and serve salmon over rice with broccoli on the side. Spoon any remaining glaze from the pan over the fish."
+          ]
         },
         {
-          "type": "snack", "name": "Sliced Pear & Walnuts",
+          "type": "snack",
+          "name": "Sliced Pear & Walnuts",
           "desc": "Fresh pear with a handful of walnuts",
-          "serves": 2, "time": "2 min",
+          "serves": 2,
+          "time": "2 min",
           "ingredients": ["2 pears, sliced", "1/4 cup walnuts"],
-          "steps": ["Slice pears and divide between two plates.", "Add a small handful of walnuts to each."]
+          "steps": [
+            "Slice pears and divide between two plates.",
+            "Add a small handful of walnuts to each."
+          ]
         }
       ]
     },
@@ -117,37 +240,84 @@
       "day": "Sunday",
       "meals": [
         {
-          "type": "breakfast", "name": "Scrambled Eggs",
+          "type": "breakfast",
+          "name": "Scrambled Eggs",
           "desc": "Sauteed spinach, mushrooms, and cherry tomatoes with sprouted grain toast",
-          "serves": 2, "time": "15 min",
-          "ingredients": ["4 eggs", "2 large handfuls fresh spinach", "8 oz mushrooms, sliced", "1 cup cherry tomatoes, halved", "1 tbsp extra virgin olive oil", "2 slices sprouted grain bread", "Salt and pepper to taste"],
-          "steps": ["Heat olive oil in a skillet over medium heat. Add mushrooms and cook 4-5 minutes until golden.", "Add cherry tomatoes and cook 2 minutes until they start to soften.", "Add spinach and stir until just wilted, about 1 minute.", "Push vegetables to one side. Crack eggs into the pan and scramble gently, folding in the vegetables as they cook.", "Season with salt and pepper.", "Toast the bread and serve alongside the eggs."]
+          "serves": 2,
+          "time": "15 min",
+          "ingredients": [
+            "4 eggs",
+            "2 large handfuls fresh spinach",
+            "8 oz mushrooms, sliced",
+            "1 cup cherry tomatoes, halved",
+            "1 tbsp extra virgin olive oil",
+            "2 slices sprouted grain bread",
+            "Salt and pepper to taste"
+          ],
+          "steps": [
+            "Heat olive oil in a skillet over medium heat. Add mushrooms and cook 4-5 minutes until golden.",
+            "Add cherry tomatoes and cook 2 minutes until they start to soften.",
+            "Add spinach and stir until just wilted, about 1 minute.",
+            "Push vegetables to one side. Crack eggs into the pan and scramble gently, folding in the vegetables as they cook.",
+            "Season with salt and pepper.",
+            "Toast the bread and serve alongside the eggs."
+          ]
         },
         {
-          "type": "dinner", "name": "Herb-Roasted Chicken Quarters",
+          "type": "dinner",
+          "name": "Herb-Roasted Chicken Quarters",
           "desc": "Roasted root vegetables (carrots, parsnips, sweet potato) and green salad",
-          "serves": 2, "time": "55 min",
-          "ingredients": ["2 chicken leg quarters", "3 carrots, peeled and cut into chunks", "3 parsnips, peeled and cut into chunks", "1 large sweet potato, cubed", "3 tbsp extra virgin olive oil", "4 cloves garlic, smashed", "1 tsp dried thyme", "1 tsp dried rosemary", "1 lemon, halved", "Mixed greens for salad", "Salt and pepper to taste"],
-          "steps": ["Preheat oven to 425F. Toss carrots, parsnips, and sweet potato with 2 tbsp olive oil, garlic, salt, and pepper. Spread in a roasting pan.", "Rub chicken quarters with remaining olive oil, thyme, rosemary, salt, and pepper. Nestle them on top of the vegetables.", "Squeeze lemon halves over everything and tuck the spent halves into the pan.", "Roast for 45-50 minutes until chicken skin is golden and crispy and internal temp reaches 165F.", "Let rest 5 minutes before serving.", "Toss mixed greens with a simple squeeze of lemon and drizzle of olive oil. Serve alongside the chicken and roasted vegetables."]
+          "serves": 2,
+          "time": "55 min",
+          "ingredients": [
+            "2 chicken leg quarters",
+            "3 carrots, peeled and cut into chunks",
+            "3 parsnips, peeled and cut into chunks",
+            "1 large sweet potato, cubed",
+            "3 tbsp extra virgin olive oil",
+            "4 cloves garlic, smashed",
+            "1 tsp dried thyme",
+            "1 tsp dried rosemary",
+            "1 lemon, halved",
+            "Mixed greens for salad",
+            "Salt and pepper to taste"
+          ],
+          "steps": [
+            "Preheat oven to 425F. Toss carrots, parsnips, and sweet potato with 2 tbsp olive oil, garlic, salt, and pepper. Spread in a roasting pan.",
+            "Rub chicken quarters with remaining olive oil, thyme, rosemary, salt, and pepper. Nestle them on top of the vegetables.",
+            "Squeeze lemon halves over everything and tuck the spent halves into the pan.",
+            "Roast for 45-50 minutes until chicken skin is golden and crispy and internal temp reaches 165F.",
+            "Let rest 5 minutes before serving.",
+            "Toss mixed greens with a simple squeeze of lemon and drizzle of olive oil. Serve alongside the chicken and roasted vegetables."
+          ]
         },
         {
-          "type": "snack", "name": "Trail Mix",
+          "type": "snack",
+          "name": "Trail Mix",
           "desc": "Almonds, walnuts, dried cranberries, and dairy-free dark chocolate chips",
-          "serves": 2, "time": "2 min",
-          "ingredients": ["1/4 cup raw almonds", "1/4 cup walnuts", "2 tbsp dried cranberries (unsweetened)", "2 tbsp dairy-free dark chocolate chips"],
-          "steps": ["Combine all ingredients in a bowl and toss.", "Divide into two portions. Store extras in an airtight container."]
+          "serves": 2,
+          "time": "2 min",
+          "ingredients": [
+            "1/4 cup raw almonds",
+            "1/4 cup walnuts",
+            "2 tbsp dried cranberries (unsweetened)",
+            "2 tbsp dairy-free dark chocolate chips"
+          ],
+          "steps": [
+            "Combine all ingredients in a bowl and toss.",
+            "Divide into two portions. Store extras in an airtight container."
+          ]
         }
       ]
     }
   ],
   "grocery": {
     "Produce": [
-      "Spinach (2 large bags)",
+      "Spinach (1 large bag)",
       "Mixed greens (1 container)",
-      "Kale (1 large bunch)",
       "Broccoli (3 heads)",
       "Bell peppers - red, yellow, green (4)",
-      "Sweet potatoes (4 medium)",
+      "Sweet potatoes (3 medium)",
       "Carrots (2 lbs)",
       "Celery (1 bunch)",
       "Cucumber (2)",
@@ -157,13 +327,12 @@
       "Garlic (1 head)",
       "Fresh ginger (1 small knob)",
       "Avocados (3)",
-      "Lemons (4)",
+      "Lemons (2)",
       "Limes (3)",
-      "Bananas (5)",
+      "Bananas (2)",
       "Blueberries (2 pints)",
       "Raspberries (1 pint)",
       "Strawberries (1 pint)",
-      "Frozen mango (1 bag)",
       "Pears (2)",
       "Mushrooms (8 oz)",
       "Cabbage (1 small head)",
@@ -173,9 +342,9 @@
     ],
     "Protein": [
       "Salmon fillets (2, about 8 oz each)",
-      "Cod fillets (2, about 8 oz each)",
       "Wild-caught shrimp (1.5 lbs)",
-      "Chicken thighs, bone-in (3 lbs)",
+      "Chicken thighs, bone-in (1.5 lbs)",
+      "Chicken leg quarters (2)",
       "Eggs (1 dozen)"
     ],
     "Grains & Legumes": [
@@ -195,10 +364,8 @@
       "Cashews (small bag)",
       "Pumpkin seeds (small bag)",
       "Chia seeds (1 bag)",
-      "Ground flaxseed (1 bag)",
       "Hemp seeds (1 bag)",
       "Unsweetened coconut flakes (small bag)",
-      "Dried apricots (small bag)",
       "Dried cranberries, unsweetened (small bag)",
       "Dark chocolate chips, dairy-free (small bag)"
     ],
@@ -206,8 +373,7 @@
       "Extra virgin olive oil",
       "Coconut oil",
       "Almond milk, unsweetened (2 cartons)",
-      "Coconut milk, full-fat canned (3 cans)",
-      "Coconut milk, carton (1)",
+      "Coconut milk, full-fat canned (1 can)",
       "Hummus (1 container)",
       "Raw honey (1 jar)",
       "Tamari or coconut aminos (1 bottle)",
