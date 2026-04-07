@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Meal Planner</title>
+<style>
+  :root {
+    --bg: #fafaf8;
+    --card: #ffffff;
+    --accent: #4a7c59;
+    --accent-light: #e8f0eb;
+    --text: #2c2c2c;
+    --text-muted: #7a7a7a;
+    --border: #e5e5e0;
+    --done-bg: #f5f5f2;
+    --done-text: #b0b0a8;
+    --breakfast: #f0e6d3;
+    --lunch: #d4e8d0;
+    --dinner: #d6e2f0;
+    --snack: #f0dfe8;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  header h1 { font-size: 28px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  header p { color: var(--text-muted); font-size: 14px; }
+
+  .loading { text-align: center; padding: 60px; color: var(--text-muted); font-size: 16px; }
+
+  .stats-bar { display: flex; gap: 16px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 24px; text-align: center; box-shadow: var(--shadow); min-width: 140px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .progress-bar-container { background: var(--border); border-radius: 100px; height: 8px; margin-top: 8px; overflow: hidden; }
+  .progress-bar-fill { background: var(--accent); height: 100%; border-radius: 100px; transition: width 0.4s ease; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 24px; justify-content: center; }
+  .tab { padding: 10px 20px; border: 1px solid var(--border); border-radius: 100px; background: var(--card); cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-muted); transition: all 0.2s; }
+  .tab:hover { border-color: var(--accent); color: var(--accent); }
+  .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .day-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+  .day-header { padding: 16px 24px; font-weight: 700; font-size: 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .day-progress { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+  .day-complete .day-header { color: var(--done-text); }
+
+  .meal-item { border-bottom: 1px solid #f0f0ec; }
+  .meal-item:last-child { border-bottom: none; }
+  .meal-row { display: flex; align-items: flex-start; padding: 14px 24px; cursor: pointer; transition: background 0.15s; gap: 14px; }
+  .meal-row:hover { background: #fafaf8; }
+  .meal-row.done { background: var(--done-bg); }
+  .meal-row.done .meal-name, .meal-row.done .meal-desc { color: var(--done-text); text-decoration: line-through; text-decoration-color: #d0d0c8; }
+
+  .meal-check { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 13px; color: transparent; }
+  .meal-row.done .meal-check { background: var(--accent); border-color: var(--accent); color: white; }
+
+  .meal-type-badge { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 10px; border-radius: 100px; flex-shrink: 0; margin-top: 2px; }
+  .badge-breakfast { background: var(--breakfast); color: #8a6d3b; }
+  .badge-lunch { background: var(--lunch); color: #3d6b35; }
+  .badge-dinner { background: var(--dinner); color: #3b5998; }
+  .badge-snack { background: var(--snack); color: #8a3d6b; }
+
+  .meal-info { flex: 1; }
+  .meal-name { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+  .meal-desc { font-size: 13px; color: var(--text-muted); }
+
+  .recipe-toggle { flex-shrink: 0; margin-top: 2px; width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-muted); transition: all 0.2s; }
+  .recipe-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .recipe-toggle.open { background: var(--accent-light); color: var(--accent); border-color: var(--accent); transform: rotate(180deg); }
+
+  .recipe-panel { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.25s ease; background: #fafaf8; padding: 0 24px; }
+  .recipe-panel.open { max-height: 800px; padding: 16px 24px 20px; }
+
+  .recipe-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); margin-bottom: 8px; margin-top: 12px; }
+  .recipe-section-title:first-child { margin-top: 0; }
+  .recipe-serves { display: inline-block; font-size: 11px; background: var(--accent-light); color: var(--accent); padding: 2px 10px; border-radius: 100px; margin-bottom: 12px; font-weight: 600; }
+  .recipe-time { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .recipe-ingredients { list-style: none; padding: 0; margin: 0 0 4px; }
+  .recipe-ingredients li { font-size: 13px; padding: 3px 0; padding-left: 16px; position: relative; color: #444; }
+  .recipe-ingredients li::before { content: "\2022"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+  .recipe-steps { list-style: none; padding: 0; margin: 0; counter-reset: steps; }
+  .recipe-steps li { font-size: 13px; padding: 6px 0; padding-left: 28px; position: relative; color: #444; }
+  .recipe-steps li::before { counter-increment: steps; content: counter(steps); position: absolute; left: 0; width: 20px; height: 20px; background: var(--accent); color: white; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; top: 7px; }
+
+  .grocery-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 16px; box-shadow: var(--shadow); overflow: hidden; }
+  .grocery-section-header { padding: 14px 24px; font-weight: 700; font-size: 15px; border-bottom: 1px solid var(--border); background: #fafaf8; display: flex; justify-content: space-between; align-items: center; }
+  .grocery-count { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  .grocery-item { display: flex; align-items: center; padding: 10px 24px; border-bottom: 1px solid #f5f5f2; cursor: pointer; gap: 12px; transition: background 0.15s; font-size: 14px; }
+  .grocery-item:hover { background: #fafaf8; }
+  .grocery-item:last-child { border-bottom: none; }
+  .grocery-item.purchased { background: var(--done-bg); color: var(--done-text); text-decoration: line-through; text-decoration-color: #d0d0c8; }
+  .grocery-check { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: transparent; transition: all 0.2s; }
+  .grocery-item.purchased .grocery-check { background: var(--accent); border-color: var(--accent); color: white; }
+  .grocery-item-name { flex: 1; }
+
+  .reset-btn { display: inline-block; margin-top: 24px; padding: 10px 20px; background: none; border: 1px solid #e0c0c0; border-radius: 8px; color: #b05050; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+  .reset-btn:hover { background: #fdf0f0; }
+
+  .legend { display: flex; gap: 16px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+  .no-items-msg { text-align: center; padding: 40px; color: var(--text-muted); font-size: 15px; }
+  .filter-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 100px; background: var(--card); cursor: pointer; font-size: 12px; color: var(--text-muted); transition: all 0.2s; }
+  .filter-btn:hover { border-color: var(--accent); }
+  .filter-btn.active { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+
+  .new-week-banner { background: var(--accent-light); border: 1px solid var(--accent); border-radius: 12px; padding: 12px 20px; text-align: center; margin-bottom: 24px; font-size: 14px; color: var(--accent); }
+  .new-week-banner button { margin-left: 12px; padding: 4px 14px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: white; cursor: pointer; font-size: 13px; }
+  .new-week-banner button:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Weekly Meal Planner</h1>
+  <p id="subtitle">Loading...</p>
+</header>
+
+<div id="newWeekBanner"></div>
+<div class="stats-bar" id="statsBar"></div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('meals')">Meals</div>
+  <div class="tab" onclick="switchTab('grocery')">Grocery List</div>
+</div>
+
+<div class="view active" id="mealsView">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--breakfast)"></div> Breakfast</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--lunch)"></div> Lunch</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--dinner)"></div> Dinner</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--snack)"></div> Snack</div>
+  </div>
+  <div id="mealsList"><div class="loading">Loading meal plan...</div></div>
+</div>
+
+<div class="view" id="groceryView">
+  <div class="filter-row" id="groceryFilters"></div>
+  <div id="groceryList"><div class="loading">Loading grocery list...</div></div>
+  <div style="text-align:center">
+    <button class="reset-btn" onclick="resetGrocery()">Reset grocery list</button>
+  </div>
+</div>
+
+<script>
+let MEALS_DATA = [];
+let GROCERY_DATA = {};
+let currentWeek = '';
+
+let mealsDone = {};
+let groceryDone = {};
+let openRecipes = {};
+let groceryFilter = 'all';
+
+function loadState() {
+  mealsDone = JSON.parse(localStorage.getItem('mealsDone') || '{}');
+  groceryDone = JSON.parse(localStorage.getItem('groceryDone') || '{}');
+  openRecipes = JSON.parse(localStorage.getItem('openRecipes') || '{}');
+  const savedWeek = localStorage.getItem('currentWeek') || '';
+  return savedWeek;
+}
+
+function save() {
+  localStorage.setItem('mealsDone', JSON.stringify(mealsDone));
+  localStorage.setItem('groceryDone', JSON.stringify(groceryDone));
+  localStorage.setItem('openRecipes', JSON.stringify(openRecipes));
+  localStorage.setItem('currentWeek', currentWeek);
+}
+
+function resetForNewWeek() {
+  mealsDone = {};
+  groceryDone = {};
+  openRecipes = {};
+  save();
+  document.getElementById('newWeekBanner').innerHTML = '';
+  render();
+}
+
+function mealKey(di, mi) { return di + '-' + mi; }
+function groceryKey(section, idx) { return section + '-' + idx; }
+
+function toggleMeal(di, mi, e) {
+  e.stopPropagation();
+  const k = mealKey(di, mi);
+  mealsDone[k] = !mealsDone[k];
+  save(); render();
+}
+
+function toggleRecipe(di, mi, e) {
+  e.stopPropagation();
+  const k = mealKey(di, mi);
+  openRecipes[k] = !openRecipes[k];
+  save(); render();
+}
+
+function toggleGrocery(section, idx) {
+  const k = groceryKey(section, idx);
+  groceryDone[k] = !groceryDone[k];
+  save(); render();
+}
+
+function resetGrocery() { groceryDone = {}; save(); render(); }
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(tab + 'View').classList.add('active');
+  event.target.classList.add('active');
+}
+
+function setGroceryFilter(f) { groceryFilter = f; render(); }
+
+function render() {
+  let totalMeals = 0, doneMeals = 0;
+  MEALS_DATA.forEach((d, di) => {
+    d.meals.forEach((m, mi) => { totalMeals++; if (mealsDone[mealKey(di, mi)]) doneMeals++; });
+  });
+  let totalGrocery = 0, doneGrocery = 0;
+  Object.keys(GROCERY_DATA).forEach(s => {
+    GROCERY_DATA[s].forEach((item, idx) => { totalGrocery++; if (groceryDone[groceryKey(s, idx)]) doneGrocery++; });
+  });
+  const pctMeals = totalMeals ? Math.round((doneMeals / totalMeals) * 100) : 0;
+  const pctGrocery = totalGrocery ? Math.round((doneGrocery / totalGrocery) * 100) : 0;
+
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat"><div class="stat-value">${doneMeals}/${totalMeals}</div><div class="stat-label">Meals completed</div><div class="progress-bar-container"><div class="progress-bar-fill" style="width:${pctMeals}%"></div></div></div>
+    <div class="stat"><div class="stat-value">${doneGrocery}/${totalGrocery}</div><div class="stat-label">Items purchased</div><div class="progress-bar-container"><div class="progress-bar-fill" style="width:${pctGrocery}%"></div></div></div>
+    <div class="stat"><div class="stat-value">${totalGrocery - doneGrocery}</div><div class="stat-label">Still need</div></div>`;
+
+  let mealsHtml = '';
+  MEALS_DATA.forEach((day, di) => {
+    let dayDone = 0;
+    day.meals.forEach((m, mi) => { if (mealsDone[mealKey(di, mi)]) dayDone++; });
+    const allDone = dayDone === day.meals.length;
+    mealsHtml += `<div class="day-card ${allDone ? 'day-complete' : ''}"><div class="day-header">${day.day}<span class="day-progress">${dayDone}/${day.meals.length} done</span></div>`;
+    day.meals.forEach((meal, mi) => {
+      const done = mealsDone[mealKey(di, mi)];
+      const recipeOpen = openRecipes[mealKey(di, mi)];
+      const hasRecipe = meal.ingredients && meal.steps;
+      mealsHtml += `<div class="meal-item">
+        <div class="meal-row ${done ? 'done' : ''}">
+          <div class="meal-check" onclick="toggleMeal(${di},${mi},event)">${done ? '&#10003;' : ''}</div>
+          <div class="meal-type-badge badge-${meal.type}">${meal.type}</div>
+          <div class="meal-info"><div class="meal-name">${meal.name}</div><div class="meal-desc">${meal.desc}</div></div>
+          ${hasRecipe ? `<div class="recipe-toggle ${recipeOpen ? 'open' : ''}" onclick="toggleRecipe(${di},${mi},event)" title="View recipe">&#9660;</div>` : ''}
+        </div>`;
+      if (hasRecipe) {
+        mealsHtml += `<div class="recipe-panel ${recipeOpen ? 'open' : ''}">
+          <div class="recipe-serves">Serves ${meal.serves}</div>
+          <div class="recipe-time">Prep + cook: ${meal.time}</div>
+          <div class="recipe-section-title">Ingredients</div>
+          <ul class="recipe-ingredients">${meal.ingredients.map(i => `<li>${i}</li>`).join('')}</ul>
+          <div class="recipe-section-title">Steps</div>
+          <ol class="recipe-steps">${meal.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+        </div>`;
+      }
+      mealsHtml += '</div>';
+    });
+    mealsHtml += '</div>';
+  });
+  document.getElementById('mealsList').innerHTML = mealsHtml;
+
+  const sections = ['all', ...Object.keys(GROCERY_DATA)];
+  document.getElementById('groceryFilters').innerHTML = sections.map(s =>
+    `<div class="filter-btn ${groceryFilter === s ? 'active' : ''}" onclick="setGroceryFilter('${s}')">${s === 'all' ? 'All' : s}</div>`
+  ).join('');
+
+  let groceryHtml = '';
+  Object.keys(GROCERY_DATA).forEach(section => {
+    if (groceryFilter !== 'all' && groceryFilter !== section) return;
+    let sectionDone = 0;
+    GROCERY_DATA[section].forEach((item, idx) => { if (groceryDone[groceryKey(section, idx)]) sectionDone++; });
+    groceryHtml += `<div class="grocery-section"><div class="grocery-section-header">${section}<span class="grocery-count">${sectionDone}/${GROCERY_DATA[section].length} purchased</span></div>`;
+    GROCERY_DATA[section].forEach((item, idx) => {
+      const done = groceryDone[groceryKey(section, idx)];
+      groceryHtml += `<div class="grocery-item ${done ? 'purchased' : ''}" onclick="toggleGrocery('${section}',${idx})"><div class="grocery-check">${done ? '&#10003;' : ''}</div><div class="grocery-item-name">${item}</div></div>`;
+    });
+    groceryHtml += '</div>';
+  });
+  if (!groceryHtml) groceryHtml = '<div class="no-items-msg">No items in this category</div>';
+  document.getElementById('groceryList').innerHTML = groceryHtml;
+}
+
+// Fetch data and initialize
+async function init() {
+  try {
+    const cacheBust = '?v=' + Date.now();
+    const res = await fetch('meals.json' + cacheBust);
+    const data = await res.json();
+
+    MEALS_DATA = data.meals;
+    GROCERY_DATA = data.grocery;
+    currentWeek = data.week;
+
+    document.getElementById('subtitle').textContent = data.week + ' \u00B7 ' + data.description;
+
+    const savedWeek = loadState();
+
+    if (savedWeek && savedWeek !== currentWeek) {
+      document.getElementById('newWeekBanner').innerHTML = `
+        <div class="new-week-banner">
+          New week detected! Clear last week's progress?
+          <button onclick="resetForNewWeek()">Start fresh</button>
+        </div>`;
+    }
+
+    render();
+  } catch (err) {
+    document.getElementById('mealsList').innerHTML = '<div class="loading">Could not load meal plan. Make sure meals.json is in the same directory.</div>';
+    console.error('Failed to load meals.json:', err);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
