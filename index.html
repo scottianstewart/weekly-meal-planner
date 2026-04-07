@@ -273,14 +273,13 @@
 // ============================================================
 // STATE
 // ============================================================
-const DB_KEY = 'mealplanner_v2';
-
+// Local prefs (per-browser, stored in localStorage)
+const LOCAL_KEY = 'mealplanner_local';
 let state = {
   model: 'claude-sonnet-4-20250514',
   preferences: 'Low-inflammatory, whole foods, dairy-free',
   exclusions: 'Brussels sprouts, cauliflower, tahini, all dairy (milk, cheese, butter, cream, yogurt)',
   servings: 2,
-  // schedule grid: each day maps to which meal types are enabled
   schedule: {
     Monday:    { enabled: false, breakfast: true, lunch: false, dinner: true, snack: true },
     Tuesday:   { enabled: true,  breakfast: true, lunch: false, dinner: true, snack: true },
@@ -290,66 +289,106 @@ let state = {
     Saturday:  { enabled: false, breakfast: true, lunch: false, dinner: true, snack: true },
     Sunday:    { enabled: true,  breakfast: true, lunch: false, dinner: true, snack: true },
   },
-  weeks: [],           // [{id, label, description, meals:[], grocery:{}, mealsDone:{}, groceryDone:{}, archived:false}]
   activeWeekId: null,
-  chatHistory: [],      // [{role, content}]
+  chatHistory: [],
+  // weeks live on the server, but we keep a local cache for fast rendering
+  weeks: [],
 };
 
-let currentPage = 'week';   // 'week' | 'settings'
-let currentTab = 'meals';   // 'meals' | 'grocery'
+let currentPage = 'week';
+let currentTab = 'meals';
 let openRecipes = {};
 let chatLoading = false;
 let generating = false;
+let saving = false;
+let saveQueued = false;
 
-function loadState() {
+// --- Local prefs (localStorage) ---
+function loadLocalPrefs() {
   try {
-    const raw = localStorage.getItem(DB_KEY);
+    const raw = localStorage.getItem(LOCAL_KEY);
     if (raw) {
       const saved = JSON.parse(raw);
-      Object.assign(state, saved);
+      // Merge saved prefs into state, but don't overwrite weeks from server
+      const { weeks, ...prefs } = saved;
+      Object.assign(state, prefs);
     }
-    // Migrate from v1 meals.json if no weeks exist
-    if (state.weeks.length === 0) {
-      migrateFromV1();
-    }
-  } catch(e) { console.error('Load error:', e); }
+  } catch(e) { console.error('Local prefs load error:', e); }
 }
 
-function saveState() {
+function saveLocalPrefs() {
   try {
-    localStorage.setItem(DB_KEY, JSON.stringify(state));
-  } catch(e) { console.error('Save error:', e); }
+    const { weeks, ...prefs } = state;
+    // Also cache weeks locally for fast initial render
+    localStorage.setItem(LOCAL_KEY, JSON.stringify({ ...prefs, weeks: state.weeks }));
+  } catch(e) { console.error('Local prefs save error:', e); }
 }
 
-function migrateFromV1() {
-  // Try to load old meals.json data from v1 localStorage
-  const oldMealsDone = JSON.parse(localStorage.getItem('mealsDone') || '{}');
-  const oldGroceryDone = JSON.parse(localStorage.getItem('groceryDone') || '{}');
-  const oldWeek = localStorage.getItem('currentWeek') || '';
+// --- Shared weeks (Vercel KV via /api/data) ---
+async function loadWeeksFromServer() {
+  try {
+    const resp = await fetch('/api/data');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    if (Array.isArray(data.weeks)) {
+      state.weeks = data.weeks;
+      saveLocalPrefs(); // update local cache
+      renderAll();
+    }
+  } catch(e) {
+    console.warn('Could not load from server, using local cache:', e.message);
+  }
+}
 
-  // Try to fetch meals.json for initial data
-  fetch('meals.json?v=' + Date.now())
-    .then(r => r.json())
-    .then(data => {
-      const week = {
-        id: generateId(),
-        label: data.week || getWeekLabel(new Date()),
-        description: data.description || '',
-        meals: data.meals || [],
-        grocery: data.grocery || {},
-        mealsDone: oldMealsDone,
-        groceryDone: oldGroceryDone,
-        archived: false,
-      };
-      state.weeks.push(week);
-      state.activeWeekId = week.id;
-      saveState();
-      renderAll();
-    })
-    .catch(() => {
-      // No meals.json, start fresh
-      renderAll();
+async function saveWeeksToServer() {
+  if (saving) { saveQueued = true; return; }
+  saving = true;
+  try {
+    const resp = await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ weeks: state.weeks }),
     });
+    if (!resp.ok) console.error('Save failed:', resp.status);
+  } catch(e) {
+    console.error('Save to server failed:', e.message);
+  }
+  saving = false;
+  if (saveQueued) { saveQueued = false; saveWeeksToServer(); }
+}
+
+// Combined save: local prefs + push weeks to server
+function saveState() {
+  saveLocalPrefs();
+  saveWeeksToServer();
+}
+
+// Save just local prefs (no server round-trip)
+function saveLocalOnly() {
+  saveLocalPrefs();
+}
+
+// --- Migration from old versions ---
+function migrateIfNeeded() {
+  // Check for old v2 data in localStorage
+  const oldRaw = localStorage.getItem('mealplanner_v2');
+  if (oldRaw) {
+    try {
+      const old = JSON.parse(oldRaw);
+      if (old.weeks && old.weeks.length > 0 && state.weeks.length === 0) {
+        state.weeks = old.weeks;
+        if (old.activeWeekId) state.activeWeekId = old.activeWeekId;
+        if (old.preferences) state.preferences = old.preferences;
+        if (old.exclusions) state.exclusions = old.exclusions;
+        if (old.schedule) state.schedule = old.schedule;
+        saveState();
+        localStorage.removeItem('mealplanner_v2');
+        return true;
+      }
+    } catch(e) {}
+    localStorage.removeItem('mealplanner_v2');
+  }
+  return false;
 }
 
 function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
@@ -602,7 +641,7 @@ function renderSettings() {
       <h3>Model</h3>
       <div class="form-row">
         <label class="form-label">Claude Model</label>
-        <select class="form-input" id="modelSelect" onchange="state.model=this.value;saveState()">
+        <select class="form-input" id="modelSelect" onchange="state.model=this.value;saveLocalOnly()">
           <option value="claude-sonnet-4-20250514" ${state.model==='claude-sonnet-4-20250514'?'selected':''}>Claude Sonnet 4 (Recommended)</option>
           <option value="claude-haiku-4-5-20251001" ${state.model==='claude-haiku-4-5-20251001'?'selected':''}>Claude Haiku 4.5 (Faster)</option>
           <option value="claude-opus-4-6" ${state.model==='claude-opus-4-6'?'selected':''}>Claude Opus 4.6 (Most capable)</option>
@@ -660,7 +699,7 @@ function savePreferences() {
   state.preferences = document.getElementById('prefsInput').value.trim();
   state.exclusions = document.getElementById('exclusionsInput').value.trim();
   state.servings = parseInt(document.getElementById('servingsInput').value) || 2;
-  saveState();
+  saveLocalOnly();
   renderSettings();
 }
 
@@ -705,14 +744,14 @@ function renderScheduleGrid() {
 function toggleDay(day) {
   if (!state.schedule[day]) state.schedule[day] = { enabled: true, breakfast: true, lunch: false, dinner: true, snack: true };
   state.schedule[day].enabled = !state.schedule[day].enabled;
-  saveState();
+  saveLocalOnly();
   document.getElementById('scheduleGrid').innerHTML = renderScheduleGrid();
 }
 
 function toggleMealSchedule(day, meal) {
   if (!state.schedule[day]) return;
   state.schedule[day][meal] = !state.schedule[day][meal];
-  saveState();
+  saveLocalOnly();
   document.getElementById('scheduleGrid').innerHTML = renderScheduleGrid();
 }
 
@@ -743,7 +782,7 @@ function selectWeek(id) {
   state.activeWeekId = id;
   currentPage = 'week';
   currentTab = 'meals';
-  saveState();
+  saveLocalOnly();
   renderAll();
 }
 
@@ -1137,7 +1176,7 @@ function toggleChat() {
 function addChatMessage(role, content) {
   state.chatHistory.push({ role, content });
   if (state.chatHistory.length > 50) state.chatHistory = state.chatHistory.slice(-40);
-  saveState();
+  saveLocalOnly();
   renderChat();
 }
 
@@ -1335,9 +1374,13 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 // ============================================================
 // INIT
 // ============================================================
-loadState();
+// 1. Load local prefs + cached weeks for instant render
+loadLocalPrefs();
+migrateIfNeeded();
 renderAll();
 renderChat();
+// 2. Then fetch fresh data from server in background
+loadWeeksFromServer();
 </script>
 </body>
 </html>
