@@ -216,6 +216,33 @@
   .empty-state h3 { font-size: 18px; color: var(--text); margin-bottom: 8px; }
   .empty-state p { font-size: 14px; margin-bottom: 20px; }
 
+  /* Favorites */
+  .fav-btn { background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px 4px; flex-shrink: 0; margin-top: 2px; transition: transform 0.15s; line-height: 1; }
+  .fav-btn:hover { transform: scale(1.2); }
+  .fav-btn .heart { color: #ddd; }
+  .fav-btn .heart.filled { color: #e25555; }
+
+  .nav-section-fav { display: flex; justify-content: space-between; align-items: center; padding: 8px 20px 4px; margin-top: 8px; }
+  .nav-section-fav .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; }
+  .nav-section-fav .fav-count { font-size: 10px; color: #888; background: rgba(255,255,255,0.08); padding: 1px 7px; border-radius: 10px; }
+
+  .nav-fav-item { padding: 7px 20px 7px 24px; cursor: pointer; font-size: 12px; color: #999; transition: all 0.15s; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-fav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+  .nav-fav-item.active { color: var(--accent); font-weight: 600; }
+  .nav-fav-item .fav-heart { color: #e25555; font-size: 11px; flex-shrink: 0; }
+  .nav-fav-item .fav-meal-type { font-size: 9px; text-transform: uppercase; opacity: 0.5; flex-shrink: 0; }
+  .nav-fav-item .fav-remove { opacity: 0; font-size: 10px; color: #666; cursor: pointer; padding: 2px 5px; border-radius: 4px; margin-left: auto; flex-shrink: 0; }
+  .nav-fav-item:hover .fav-remove { opacity: 1; }
+  .nav-fav-item .fav-remove:hover { color: #ff6b6b; background: rgba(255,100,100,0.1); }
+
+  /* Favorites detail page */
+  .fav-detail-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .fav-detail-header { padding: 20px; border-bottom: 1px solid var(--border); background: #fafaf8; }
+  .fav-detail-header h2 { font-size: 20px; margin-bottom: 4px; }
+  .fav-detail-header .desc { font-size: 13px; color: var(--text-muted); }
+  .fav-detail-meta { display: flex; gap: 10px; margin-top: 10px; }
+  .fav-detail-body { padding: 20px; }
+
   /* Responsive */
   @media (max-width: 900px) {
     .sidebar { width: 200px; }
@@ -316,6 +343,8 @@ let state = {
   chatHistory: [],
   // weeks live on the server, but we keep a local cache for fast rendering
   weeks: [],
+  // favorites: array of saved recipe objects
+  favorites: [],
 };
 
 let currentPage = 'week';
@@ -455,6 +484,7 @@ function activeWeek() {
 function renderAll() {
   renderSidebar();
   if (currentPage === 'settings') renderSettings();
+  else if (currentPage === 'favorite') renderFavoritePage();
   else renderWeekPage();
 }
 
@@ -472,6 +502,19 @@ function renderSidebar() {
     </div>`;
   });
   html += `<div class="add-week-btn" onclick="showAddWeekModal()">+ Add Week</div>`;
+
+  // Favorites section
+  if (state.favorites.length > 0) {
+    html += `<div class="nav-section-fav"><span class="label">Favorites</span><span class="fav-count">${state.favorites.length}</span></div>`;
+    state.favorites.forEach(f => {
+      const isActive = currentPage === 'favorite' && activeFavId === f.id;
+      html += `<div class="nav-fav-item ${isActive ? 'active' : ''}" onclick="showFavoriteDetail('${f.id}')">
+        <span class="fav-heart">&#9829;</span>
+        <span style="overflow:hidden;text-overflow:ellipsis">${f.name}</span>
+        <span class="fav-remove" onclick="event.stopPropagation();removeFavorite('${f.id}')" title="Remove">x</span>
+      </div>`;
+    });
+  }
 
   if (archived.length) {
     html += `<div class="nav-section">Archived</div>`;
@@ -583,6 +626,9 @@ function renderMealsTab(week) {
             <div class="meal-name editable" contenteditable="true" onblur="updateMealField(${di},${mi},'name',this.textContent)">${meal.name}</div>
             <div class="meal-desc editable" contenteditable="true" onblur="updateMealField(${di},${mi},'desc',this.textContent)">${meal.desc}</div>
           </div>
+          <button class="fav-btn" onclick="event.stopPropagation();toggleFavorite(${di},${mi})" title="${isFav(di,mi) ? 'Remove from favorites' : 'Add to favorites'}">
+            <span class="heart ${isFav(di,mi) ? 'filled' : ''}">${isFav(di,mi) ? '&#9829;' : '&#9825;'}</span>
+          </button>
           <div class="meal-actions">
             <button class="btn btn-ghost btn-sm btn-icon" onclick="regenerateMeal(${di},${mi})" title="Regenerate with Claude">&#x21bb;</button>
             <button class="btn btn-ghost btn-sm btn-icon btn-danger" onclick="removeMeal(${di},${mi})" title="Remove">x</button>
@@ -1504,6 +1550,104 @@ function extractJSON(text) {
   }
   console.error('Could not extract JSON from:', text);
   return null;
+}
+
+// ============================================================
+// FAVORITES
+// ============================================================
+let activeFavId = null; // currently viewing favorite detail
+
+function isFav(di, mi) {
+  const week = activeWeek();
+  if (!week || !week.meals[di] || !week.meals[di].meals[mi]) return false;
+  const meal = week.meals[di].meals[mi];
+  return state.favorites.some(f => f.name === meal.name && f.type === meal.type);
+}
+
+function toggleFavorite(di, mi) {
+  const week = activeWeek();
+  if (!week) return;
+  const meal = week.meals[di].meals[mi];
+  const idx = state.favorites.findIndex(f => f.name === meal.name && f.type === meal.type);
+  if (idx >= 0) {
+    state.favorites.splice(idx, 1);
+  } else {
+    state.favorites.push({
+      id: generateId(),
+      name: meal.name,
+      desc: meal.desc || '',
+      type: meal.type,
+      serves: meal.serves || state.servings,
+      time: meal.time || '',
+      ingredients: [...(meal.ingredients || [])],
+      steps: [...(meal.steps || [])],
+      savedFrom: week.label,
+      savedAt: new Date().toISOString(),
+    });
+  }
+  saveLocalOnly();
+  renderAll();
+}
+
+function removeFavorite(id) {
+  state.favorites = state.favorites.filter(f => f.id !== id);
+  if (activeFavId === id) activeFavId = null;
+  saveLocalOnly();
+  renderAll();
+}
+
+function showFavoriteDetail(id) {
+  activeFavId = id;
+  currentPage = 'favorite';
+  renderAll();
+}
+
+function renderFavoritePage() {
+  currentPage = 'favorite';
+  const fav = state.favorites.find(f => f.id === activeFavId);
+  const hdr = document.getElementById('mainHeader');
+  const body = document.getElementById('mainBody');
+
+  if (!fav) {
+    hdr.innerHTML = '<div><h1>Favorites</h1><div class="main-header-sub">Recipe not found</div></div>';
+    body.innerHTML = '<div class="empty-state"><p>This favorite could not be found.</p></div>';
+    return;
+  }
+
+  hdr.innerHTML = `
+    <div>
+      <h1>${fav.name}</h1>
+      <div class="main-header-sub">Saved from ${fav.savedFrom || 'unknown week'}</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-danger btn-sm" onclick="removeFavorite('${fav.id}')">Remove from favorites</button>
+    </div>`;
+
+  let html = '<div class="fav-detail-card">';
+  html += `<div class="fav-detail-header">
+    <h2>${fav.name}</h2>
+    <div class="desc">${fav.desc}</div>
+    <div class="fav-detail-meta">
+      <span class="meal-badge badge-${fav.type}">${fav.type}</span>
+      <span class="recipe-meta-tag">Serves ${fav.serves || 2}</span>
+      <span class="recipe-meta-tag">${fav.time || '?'}</span>
+    </div>
+  </div>`;
+
+  html += '<div class="fav-detail-body">';
+  if (fav.ingredients && fav.ingredients.length > 0) {
+    html += '<div class="recipe-sec-title">Ingredients</div>';
+    html += '<ul class="recipe-ing">' + fav.ingredients.map(ing => `<li>${ing}</li>`).join('') + '</ul>';
+  }
+  if (fav.steps && fav.steps.length > 0) {
+    html += '<div class="recipe-sec-title">Steps</div>';
+    html += '<ol class="recipe-steps">' + fav.steps.map(step => `<li>${step}</li>`).join('') + '</ol>';
+  }
+  if ((!fav.ingredients || fav.ingredients.length === 0) && (!fav.steps || fav.steps.length === 0)) {
+    html += '<p style="color:var(--text-muted);font-size:13px">No recipe details saved for this meal.</p>';
+  }
+  html += '</div></div>';
+  body.innerHTML = html;
 }
 
 // ============================================================
